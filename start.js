@@ -2,6 +2,8 @@ let _modPath
 let modName = 'uc'
 let modDisplayName = 'Upgrade Calculator'
 
+const log = (...message) => console.log(`[${modDisplayName}]:`, ...message)
+
 exports.initialize = modPath => {
   _modPath = modPath
 
