@@ -1,0 +1,120 @@
+<h1>
+  <span class="company-name">
+    <img
+      ng-src="{{ ucCtrl.product.logoPath }}"
+      ng-if="ucCtrl.product.logoPath"
+      class="website-logo"
+    >
+    {{ ucCtrl.product.name }}
+  </span>
+  <i
+    class="fa fa-times pull-right close-button"
+    close-all-ui
+  ></i>
+</h1>
+
+<ul
+  class="tab-list"
+  style="display: inline-block; margin-bottom: 0;"
+  ng-if="ucCtrl.products.length > 1"
+>
+  <li
+    ng-repeat="product in ucCtrl.products"
+    ng-class="{ active: ucCtrl.product.name == product.name }"
+    ng-mousedown="ucCtrl.selectProduct(product)"
+    title="{{ product.name }}"
+  >
+    <span>{{ product.name }}</span>
+  </li>
+</ul>
+
+<div class="item-list features-stats">
+  <div class="content flex-row">
+    <div class="flex1 flex-super-center padding">
+      <span>Upgrade all Features by&nbsp;</span>
+      <ul class="multi-toggle">
+        <li
+          ng-repeat="i in [1,5,10,100,1000]"
+          ng-click="ucCtrl.setUpgradeScale(i)"
+          ng-class="{ active: ucCtrl.upgradeScale == i }"
+        >
+          +{{i}}
+        </li>
+      </ul>
+      <span>&nbsp;levels</span>
+    </div>
+  </div>
+  <hr class="big" />
+  <div
+    class="item-list horizontal flex-row"
+    style="height: 100%;"
+  >
+    <div
+      class="item flex1"
+      style="height: auto;"
+    >
+      <h3>To upgrade {{ ucCtrl.upgradeScale }} {{ ucCtrl.upgradeScale > 1 ? 'times' : 'time'}}, you need:</h3>
+
+      <div class="scrollbox optimize-scroll">
+        <table class="medium">
+          <tr ng-repeat="component in ucCtrl.upgradeCost | orderBy: '-amount'">
+            <td>
+              <component
+                class="small"
+                component="::component"
+              ></component>
+            </td>
+            <td localize="{{ ::component.name }}"></td>
+            <td class="text-bold">{{ component.amount * ucCtrl.upgradeScale }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div
+      class="item flex1"
+      style="height: auto;"
+    >
+      <h3>To make all that, you need:</h3>
+
+      <div class="scrollbox optimize-scroll">
+        <table class="medium">
+          <tr ng-repeat="component in ucCtrl.totalUpgradeCost | orderBy: '-amount'">
+            <td>
+              <component
+                class="small"
+                component="::component"
+              ></component>
+            </td>
+            <td localize="{{ ::component.name }}"></td>
+            <td class="text-bold">{{ component.amount * ucCtrl.upgradeScale }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="item overflow-visible">
+    <div class="content flex-row">
+      <div class="flex1 flex-rowflex-super-center">
+        <table>
+          <tr
+            ng-repeat="feature in $root.settings.featureInstances | filter:{ productId: ucCtrl.product.id } track by feature.id"
+            ng-if="feature.requirements && ucCtrl.isUserFeature(feature.featureName)"
+          >
+            <td>
+              {{ ucCtrl.getFriendlyName(feature) }}
+            </td>
+            <td>
+              <component
+                ng-repeat="(requirement, amount) in feature.requirements"
+                component="::ucCtrl.getComponent(requirement)"
+                class="small"
+                stack-amount="amount * ucCtrl.upgradeScale"
+              />
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
