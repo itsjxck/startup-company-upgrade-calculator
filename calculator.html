@@ -57,14 +57,14 @@
 
       <div class="scrollbox optimize-scroll">
         <table class="medium">
-          <tr ng-repeat="component in ucCtrl.upgradeCost | orderBy: '-amount'">
+          <tr ng-repeat="component in ucCtrl.resourcesForUpgrade | orderBy: '-amount'">
             <td>
               <component
                 class="small"
-                component="::component"
+                component="ucCtrl.getComponent(component.name)"
               ></component>
             </td>
-            <td localize="{{ ::component.name }}"></td>
+            <td localize="{{ component.name }}"></td>
             <td class="text-bold">{{ component.amount * ucCtrl.upgradeScale }}</td>
           </tr>
         </table>
@@ -78,14 +78,14 @@
 
       <div class="scrollbox optimize-scroll">
         <table class="medium">
-          <tr ng-repeat="component in ucCtrl.totalUpgradeCost | orderBy: '-amount'">
+          <tr ng-repeat="component in ucCtrl.componentsForUpgrade | orderBy: '-amount'">
             <td>
               <component
                 class="small"
-                component="::component"
+                component="::ucCtrl.getComponent(component.name)"
               ></component>
             </td>
-            <td localize="{{ ::component.name }}"></td>
+            <td localize="{{ component.name }}"></td>
             <td class="text-bold">{{ component.amount * ucCtrl.upgradeScale }}</td>
           </tr>
         </table>

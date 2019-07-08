@@ -25,11 +25,63 @@ exports.initialize = modPath => {
   ]
 }
 
+exports.onLoadGame = async () => {
+  Components
+    .filter(({ type }) => type == Enums.ComponentTypes.Module)
+    .forEach(m => m.friendlyReqs = convertToFriendly(m.requirements))
+
+  log('calculating resource costs')
+  calculateModuleCosts()
+}
+
+function convertToFriendly(resources) {
+  return Object
+    .keys(resources)
+    .map(name => ({
+      name,
+      amount: resources[name],
+      type: Components.find(c => c.name == name).type
+    }))
+}
+
+function spread(resources) {
+  return resources.reduce((acc, part) => [...acc, ...part], [])
+}
+
+function reduce(resources) {
+  return resources.reduce((acc, { name, amount }) => {
+    let component = acc.find(c => c.name == name)
+    component ? component.amount += amount : acc.push({ name, amount })
+    return acc
+  }, [])
+}
+
+async function calculateModuleCosts() {
+  // Functions to help
+  const getResourceObject = resourceName => new Promise(resolve => resolve(Components.find(resource => resource.name == resourceName)))
+  const multiply = (resources, multiplier) => new Promise(resolve => resolve(resources.map(({ name, amount }) => ({ name, amount: amount * multiplier }))))
+
+  const getResourceCost = resource => new Promise(async resolve => {
+    // Destructure
+    let { friendlyReqs } = (typeof resource == "string") ? await getResourceObject(resource) : resource
+
+    // Is a module and not cached
+    let moduleCost = await Promise.all(friendlyReqs.map(async ({ name, amount, type }) => type == Enums.ComponentTypes.Module ? await multiply(await getResourceCost(name), amount) : [{ name, amount }]))
+    let reduced = reduce(spread(moduleCost))
+
+    resource.cost = reduced
+
+    resolve(reduced)
+  })
+
+  Components.filter(({ type }) => type == Enums.ComponentTypes.Module).map(getResourceCost)
+}
+
 function UpgradeCalculatorViewController($rootScope) {
   let ctrl = this
 
-  ctrl.upgradeCost = {}
-  ctrl.totalUpgradeCost = {}
+  ctrl.resourcesForUpgrade = {}
+  ctrl.componentsForUpgrade = {}
   ctrl.products = $rootScope.settings.products
   ctrl.product = ctrl.products[0]
   ctrl.upgradeScale = 1
@@ -37,76 +89,26 @@ function UpgradeCalculatorViewController($rootScope) {
   ctrl.selectProduct = product => (ctrl.product = product) && (ctrl.calculateFeatureUpgradeCosts())
   ctrl.setUpgradeScale = scale => ctrl.upgradeScale = scale
   ctrl.getFriendlyName = Helpers.GetFriendlyFeatureName
-  ctrl.getComponent = requirement => Components.find(component => component.name == requirement)
+  ctrl.getComponent = componentName => Components.find(component => component.name == componentName)
   ctrl.isUserFeature = featureName => Features.find(feature => feature.name == featureName).categoryName == Enums.FeatureCategories.Users
 
   ctrl.calculateFeatureUpgradeCosts = () => {
-    let cachedResourceCosts = {}
-
     let productFeatures = $rootScope.settings.featureInstances.filter(feature => feature.productId == ctrl.product.id)
     let upgradeableFeatures = productFeatures.filter(({ featureName }) => ctrl.isUserFeature(featureName))
+    log('upgradeable:', upgradeableFeatures)
 
-    console.log('upgradeable:', upgradeableFeatures)
+    let resourcesForUpgrade = reduce(spread(upgradeableFeatures.map(feature => convertToFriendly(feature.requirements))))
+    log('resourcesForUpgrade:', resourcesForUpgrade)
 
-    let resourcesRequiredForUpgrade = reduceResources(upgradeableFeatures.map(feature => feature.requirements))
+    let componentsForUpgrade = reduce(spread(resourcesForUpgrade.map(({ name, amount }) => {
+      let component = ctrl.getComponent(name)
+      return component.cost ? component.cost : [{ name, amount }]
+    })))
+    log('componentsForUpgrade:', componentsForUpgrade)
 
-    let totalUpgradeCost = reduceResources(Object.keys(resourcesRequiredForUpgrade).map(resource => multiply(getResourceCost(resource), resourcesRequiredForUpgrade[resource])))
-
-    ctrl.upgradeCost = arrayify(resourcesRequiredForUpgrade)
-    ctrl.totalUpgradeCost = arrayify(reduceResources([totalUpgradeCost, resourcesRequiredForUpgrade]))
-
-    console.log('required:', ctrl.upgradeCost)
-    console.log('total:', ctrl.totalUpgradeCost)
-
-    function arrayify(resources) {
-      return Object.keys(resources).map(resource => ({ ...ctrl.getComponent(resource), amount: resources[resource] }))
-    }
-
-    function reduceResources(resources) {
-      console.log('reducing:', resources)
-      return resources.reduce((acc, res) => {
-        Object.keys(res)
-          .forEach(c =>
-            acc[c]
-              ? acc[c] += res[c]
-              : acc[c] = res[c]
-          )
-        return acc
-      }, {})
-    }
-
-    function multiply(resources, amount) {
-      console.log('multiplying:', resources, 'by:', amount)
-      Object.keys(resources).map(resource => resources[resource] * amount)
-      console.log('mulitplied:', resources)
-      return resources
-    }
-
-    function getResourceCost(resourceName) {
-      if (cachedResourceCosts[resourceName]) {
-
-        console.log('cache hit:', cachedResourceCosts[resourceName])
-        return cachedResourceCosts[resourceName]
-
-      } else {
-
-        let resource = Components.find(c => c.name == resourceName)
-        if (resource.type == Enums.ComponentTypes.Module) {
-
-          // Is a module and has requirements
-          let resourceCost = reduceResources(Object.keys(resource.requirements).map(requirement => multiply(getResourceCost(requirement), resource.requirements[requirement])))
-
-          cachedResourceCosts[resourceName] = resourceCost
-          return resourceCost
-
-        } else {
-          // Is a raw component
-          return { [resourceName]: 1 }
-        }
-      }
-    }
+    ctrl.resourcesForUpgrade = resourcesForUpgrade
+    ctrl.componentsForUpgrade = componentsForUpgrade
   }
 
   ctrl.calculateFeatureUpgradeCosts()
-
 }
