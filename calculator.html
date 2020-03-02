@@ -17,7 +17,7 @@
 >
   <li
     ng-repeat="product in ucCtrl.products"
-    ng-class="{ active: ucCtrl.product.name == product.name }"
+    ng-class="{ active: ucCtrl.product.name === product.name }"
     ng-mousedown="ucCtrl.selectProduct(product)"
     title="{{ product.name }}"
   >
@@ -33,7 +33,7 @@
         <li
           ng-repeat="i in [1,5,10,100,1000]"
           ng-click="ucCtrl.setUpgradeScale(i)"
-          ng-class="{ active: ucCtrl.upgradeScale == i }"
+          ng-class="{ active: ucCtrl.upgradeScale === i }"
         >
           +{{i}}
         </li>
