@@ -4,13 +4,10 @@
       ng-src="{{ ucCtrl.product.logoPath }}"
       ng-if="ucCtrl.product.logoPath"
       class="website-logo"
-    >
+    />
     {{ ucCtrl.product.name }}
   </span>
-  <i
-    class="fa fa-times pull-right close-button"
-    close-all-ui
-  ></i>
+  <i class="fa fa-times pull-right close-button" close-all-ui></i>
 </h1>
 
 <ul
@@ -45,19 +42,18 @@
     </div>
   </div>
   <hr class="big" />
-  <div
-    class="item-list horizontal flex-row"
-    style="height: 100%;"
-  >
-    <div
-      class="item flex1"
-      style="height: auto;"
-    >
-      <h3>To upgrade {{ ucCtrl.upgradeScale }} {{ ucCtrl.upgradeScale > 1 ? 'times' : 'time'}}, you need:</h3>
+  <div class="item-list horizontal flex-row" style="height: 100%;">
+    <div class="item flex1" style="height: auto;">
+      <h3>
+        To upgrade {{ ucCtrl.upgradeScale }} {{ ucCtrl.upgradeScale > 1 ?
+        'times' : 'time'}}, you need:
+      </h3>
 
       <div class="scrollbox optimize-scroll">
         <table class="medium">
-          <tr ng-repeat="component in ucCtrl.resourcesForUpgrade | orderBy: '-amount'">
+          <tr
+            ng-repeat="component in ucCtrl.resourcesForUpgrade | orderBy: '-amount'"
+          >
             <td>
               <component
                 class="small"
@@ -65,20 +61,21 @@
               ></component>
             </td>
             <td localize="{{ component.name }}"></td>
-            <td class="text-bold">{{ component.amount * ucCtrl.upgradeScale }}</td>
+            <td class="text-bold">
+              {{ component.amount * ucCtrl.upgradeScale }}
+            </td>
           </tr>
         </table>
       </div>
     </div>
-    <div
-      class="item flex1"
-      style="height: auto;"
-    >
+    <div class="item flex1" style="height: auto;">
       <h3>To make all that, you need:</h3>
 
       <div class="scrollbox optimize-scroll">
         <table class="medium">
-          <tr ng-repeat="component in ucCtrl.componentsForUpgrade | orderBy: '-amount'">
+          <tr
+            ng-repeat="component in ucCtrl.componentsForUpgrade | orderBy: '-amount'"
+          >
             <td>
               <component
                 class="small"
@@ -86,7 +83,9 @@
               ></component>
             </td>
             <td localize="{{ component.name }}"></td>
-            <td class="text-bold">{{ component.amount * ucCtrl.upgradeScale }}</td>
+            <td class="text-bold">
+              {{ component.amount * ucCtrl.upgradeScale }}
+            </td>
           </tr>
         </table>
       </div>
@@ -95,7 +94,7 @@
 
   <div class="item overflow-visible">
     <div class="content flex-row">
-      <div class="flex1 flex-rowflex-super-center">
+      <div class="flex1 flex-row flex-super-center">
         <table>
           <tr
             ng-repeat="feature in $root.settings.featureInstances | filter:{ productId: ucCtrl.product.id } track by feature.id"

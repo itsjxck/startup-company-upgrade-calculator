@@ -1,4 +1,5 @@
 {
   "name": "Upgrade Calculator",
-  "description": "Calculates how many components/modules you need to upgrade all your features simultaneaously."
+  "description": "Calculates how many components/modules you need to upgrade all your features simultaneaously.",
+  "version": "v0.1.1"
 }
