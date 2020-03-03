@@ -12,7 +12,7 @@ const modDisplayName = "Upgrade Calculator";
 const log = (...message) =>
   console.log(`[${modDisplayName} ${version}]:`, ...message);
 
-exports.initialize = modPath => {
+exports.initialize = async modPath => {
   Modding.setMenuItem({
     name: modName,
     tooltip: modDisplayName,
@@ -29,9 +29,7 @@ exports.initialize = modPath => {
       controller: UpgradeCalculatorViewController
     }
   ];
-};
 
-exports.onLoadGame = async () => {
   await Promise.all(
     Components.filter(({ type }) => type === Enums.ComponentTypes.Module).map(
       async module => {
